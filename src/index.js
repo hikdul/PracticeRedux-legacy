@@ -1,14 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createStore } from 'redux'
-import App, { reducer} from './App' // ! esto no es una buena practica.. solo es para entender!!
+import { Provider } from 'react-redux'
+import App, { reducer } from './App' // ! esto no es una buena practica.. solo es para entender!!
 import reportWebVitals from './reportWebVitals'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
+const store = createStore(reducer)  // ! esto no es una buena practica.. solo es para entender!!
+
 root.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>
 )
 

@@ -27,7 +27,7 @@ export const reducer = (state = initialState, action) => {
       entities: newTodos
      }
     }
-    case 'filte/set': {
+    case 'filter/set': {
       return {
         ...state,
         filter: action.payload
@@ -79,9 +79,9 @@ const App = () =>
       return
 
     const Id = Math.random().toString(36).substring( 3,13)
-    //const todo = {title: value, completed: false, id: Id}
+    const todo = {title: value, completed: false, id: Id}
     //console.log({todo})
-    dispatch({ type: 'todo/add', payload: {title: value, completed: false, id: Id}})
+    dispatch({ type: 'todo/add', payload: {...todo} })
     setValue('')
   }
 

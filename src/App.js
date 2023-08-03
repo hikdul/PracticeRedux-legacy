@@ -5,37 +5,43 @@ const initialState = {
   entities: [],
   filter: 'all'// complete, incomplete
 }
-// ** un todo debe de completar los siguientes datos {Id: number, title: string, completed: bool}
 
-// ! evitar la mutabilidad en reducer, siempo devolver una nueva copia del elemento o del estado... esto motivado a que reducer no re-renderizan si no es un estado nuevo
-export const reducer = (state = initialState, action) => {
+export const filterReducer = (state = 'all', action) =>
+{
+  switch (action.type) {
+    case 'filter/set': {
+      return action.payload
+    }
+  
+    default:
+      return state;
+  }
+}
+
+export const todosReducer = (state = [], action) =>
+{
+
   switch (action.type) {
     case 'todo/add':{
-      return{
-        ...state,
-        entities: state.entities.concat({...action.payload })
-      }
+      return state.concat({...action.payload })
     }
     case 'todo/complete': {
-      const newTodos = state.entities.map(todo => {
+      const newTodos = state.map(todo => {
         if(todo.id === action.payload.id)
           return {...todo, completed: !todo.completed }
         return todo
       })
-     return {
-      ...state,
-      entities: newTodos
-     }
+     return newTodos
     }
-    case 'filter/set': {
-      return {
-        ...state,
-        filter: action.payload
-      }
-    }
-    default:{
-      return state
-    }
+    default:
+      return state;
+  }
+}
+
+export const reducer = (state = initialState, action) => {
+  return{
+    entities: todosReducer(state.entities, action),
+    filter: filterReducer(state.filter, action),
   }
 }
 

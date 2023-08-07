@@ -10,18 +10,25 @@ export const asyncMiddleware = store => next => action =>
   next(action)
 }
 
+const setPending = () => ({ type: 'todos/pending'})
+const setFullFilled = todos => ({type: 'todos/fullfilled', payload: todos} )
+const setError = e => ({type: 'todos/error', error: e.message})
+const setComplete = todo => ({ type:'todo/complete', payload: todo })
+const setAddTodo = todo => ({ type: 'todo/add', payload: {...todo} })
+const setFilter = filter => ({type:'filter/set', payload:filter})
+
 export const fetchThunk = () => async dispatch => {
-  dispatch({ type: 'todos/pending'})
+  dispatch(setPending)
   try
   {
     const resp = await fetch('https://jsonplaceholder.typicode.com/todos') 
     const data = await resp.json()
     const todos = data.slice(10,25)
-    dispatch({type: 'todos/fullfilled', payload: todos})
+    dispatch(setFullFilled(todos))
   }
   catch (e) 
   {
-    dispatch({type: 'todos/error', error: e.message})
+    dispatch(setError(e))
   }
 }
 
@@ -31,7 +38,6 @@ export const filterReducer = (state = 'all', action) =>
     case 'filter/set': {
       return action.payload
     }
-  
     default:
       return state;
   }
@@ -111,7 +117,7 @@ const TodoItem = ({todo}) =>
   return(
     <li
       style={{textDecoration: todo.completed ? 'line-through' : 'none'}}
-      onClick={()=> dispatch({ type:'todo/complete', payload:todo })}
+      onClick={()=> dispatch(setComplete(todo))}
     >
        <b>{todo.id}:</b> {todo.title} 
     </li>
@@ -135,7 +141,7 @@ const App = () =>
 
     const Id = Math.random().toString(36).substring( 3,13)
     const todo = {title: value, completed: false, id: Id}
-    dispatch({ type: 'todo/add', payload: {...todo} })
+    dispatch(setAddTodo(todo))
     setValue('')
   }
 
@@ -150,9 +156,9 @@ const App = () =>
         <input value={value} onChange={e => setValue(e.target.value)}/>
         <button type='submit' >+</button>
       </form>
-      <button onClick={() => dispatch({type:'filter/set', payload:'all'})} > all </button>
-      <button onClick={() => dispatch({type:'filter/set', payload:'complete'})}> complete </button>
-      <button onClick={() => dispatch({type:'filter/set', payload:'incomplete'})}> incomplete </button>
+      <button onClick={() => dispatch(setFilter('all'))} > all </button>
+      <button onClick={() => dispatch(setFilter('complete'))}> complete </button>
+      <button onClick={() => dispatch(setFilter('incomplete'))}> incomplete </button>
       <button onClick={() => dispatch(fetchThunk())}> Fetch </button>
       <ul>
         {todos.map( todo => <TodoItem key={todo.id} todo={todo}/> )}

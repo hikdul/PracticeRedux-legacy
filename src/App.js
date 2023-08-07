@@ -67,10 +67,6 @@ const App = () =>
 
   const [value, setValue] = useState('')
   const dispatch = useDispatch()
-  //  ** --> // la idea en la siguiente linea es que obtiene el estado completo.
-  //  ** --> // const state = useSelector(x => x)
-  // ** --> // en la siguiente linea hacemos uso del hock que es la idea de este
-  //const state = useSelector(selectTodos)
   const todos = useSelector(selectTodos)
   
   const submit = e => {
@@ -82,7 +78,6 @@ const App = () =>
 
     const Id = Math.random().toString(36).substring( 3,13)
     const todo = {title: value, completed: false, id: Id}
-    //console.log({todo})
     dispatch({ type: 'todo/add', payload: {...todo} })
     setValue('')
   }

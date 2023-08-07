@@ -2,6 +2,28 @@ import { useState } from 'react'
 import { combineReducers } from 'redux'
 import { useDispatch, useSelector } from 'react-redux'
 
+// ** use de middlewares
+export const asyncMiddleware = store => next => action =>
+{
+  if(typeof action === 'function')
+    return action(store.dispatch, store.getState)
+  next(action)
+}
+
+export const fetchThunk = () => async dispatch => {
+  dispatch({ type: 'todos/pending'})
+  try
+  {
+    const resp = await fetch('https://jsonplaceholder.typicode.com/todos') 
+    const data = await resp.json()
+    const todos = data.slice(10,25)
+    dispatch({type: 'todos/fullfilled', payload: todos})
+  }
+  catch (e) 
+  {
+    dispatch({type: 'todos/error', error: e.message})
+  }
+}
 
 export const filterReducer = (state = 'all', action) =>
 {
@@ -15,10 +37,37 @@ export const filterReducer = (state = 'all', action) =>
   }
 }
 
+const initialFetchingReducer = { loading: 'idle', error: null }
+
+export const fetchingReducer = ( state = initialFetchingReducer, action ) => {
+  
+  switch (action.type) {
+    case 'todos/pending':
+    {
+      return { ...state, loading: 'pending'}
+    }     
+    case 'todos/fullfilled':
+    {
+      return { ...state, loading: 'succeded'}
+    }
+    case 'todos/error':
+    {
+      return { error: action.error, loading: 'rejected'}
+    }
+    default:
+    {
+     return {...state, loading: 'idle'}
+    }
+  }
+}
+
 export const todosReducer = (state = [], action) =>
 {
 
   switch (action.type) {
+    case 'todos/fullfilled':{
+      return action.payload
+    }
     case 'todo/add':{
       return state.concat({...action.payload })
     }
@@ -36,20 +85,25 @@ export const todosReducer = (state = [], action) =>
 }
 
 export const reducer =  combineReducers({
-  entities: todosReducer,
+  todos: combineReducers({
+    entities: todosReducer,
+    status: fetchingReducer,
+  }),
   filter: filterReducer,
 })
 
 
 const selectTodos = state =>{
-  const{entities, filter} = state
+  const{todos: {entities}, filter} = state
   
-  if(filter == 'complete')
+  if(filter === 'complete')
     return entities.filter(todo => todo.completed)
-  if(filter == 'incomplete')
+  if(filter === 'incomplete')
     return entities.filter(todo => !todo.completed)
   return entities
 }
+
+const selectStatus = state =>  state.todos.status
 
 const TodoItem = ({todo}) => 
 {
@@ -57,8 +111,10 @@ const TodoItem = ({todo}) =>
   return(
     <li
       style={{textDecoration: todo.completed ? 'line-through' : 'none'}}
-      onClick={()=> dispatch({type:'todo/complete', payload:todo})}
-    > <b>{todo.id}:</b> {todo.title} </li>
+      onClick={()=> dispatch({ type:'todo/complete', payload:todo })}
+    >
+       <b>{todo.id}:</b> {todo.title} 
+    </li>
   )
 }
 
@@ -68,6 +124,7 @@ const App = () =>
   const [value, setValue] = useState('')
   const dispatch = useDispatch()
   const todos = useSelector(selectTodos)
+  const status = useSelector(selectStatus)
   
   const submit = e => {
 
@@ -82,6 +139,11 @@ const App = () =>
     setValue('')
   }
 
+  if(status.loading === 'pending')
+    return <p>Loading...</p>
+  if(status.loading === 'rejected')
+    return <p><b>Error: </b>{status.error}</p>
+
   return (
     <div>
       <form onSubmit={submit}>
@@ -91,6 +153,7 @@ const App = () =>
       <button onClick={() => dispatch({type:'filter/set', payload:'all'})} > all </button>
       <button onClick={() => dispatch({type:'filter/set', payload:'complete'})}> complete </button>
       <button onClick={() => dispatch({type:'filter/set', payload:'incomplete'})}> incomplete </button>
+      <button onClick={() => dispatch(fetchThunk())}> Fetch </button>
       <ul>
         {todos.map( todo => <TodoItem key={todo.id} todo={todo}/> )}
       </ul>

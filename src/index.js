@@ -1,13 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
-import App, { reducer } from './App' // ! esto no es una buena practica.. solo es para entender!!
+import App, { reducer, asyncMiddleware } from './App' // ! esto no es una buena practica.. solo es para entender!!
 import reportWebVitals from './reportWebVitals'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
-const store = createStore(reducer)  // ! esto no es una buena practica.. solo es para entender!!
+const store = createStore(reducer, applyMiddleware(asyncMiddleware))  // ! esto no es una buena practica.. solo es para entender!!
+
 
 root.render(
   <React.StrictMode>

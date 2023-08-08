@@ -2,7 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
-import App, { reducer, asyncMiddleware } from './App' // ! esto no es una buena practica.. solo es para entender!!
+import App from './App' // ! esto no es una buena practica.. solo es para entender!!
+import {asyncMiddleware} from './middlewares/async'
+import { reducer } from './features'
 import reportWebVitals from './reportWebVitals'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))

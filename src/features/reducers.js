@@ -1,64 +1,20 @@
 
 import { combineReducers } from "redux"
+import { makeCrudReducer, makefetchingReducer, makeSetReducer, reduceReducers } from "./utils";
 
-const filterReducer = (state = 'all', action) =>
-{
-  switch (action.type) {
-    case 'filter/set': {
-      return action.payload
-    }
-    default:
-      return state;
-  }
-}
+export const filterReducer = makeSetReducer(['filter/set'])
 
-const initialFetchingReducer = { loading: 'idle', error: null }
+const fetchingReducer = makefetchingReducer([
+    'todos/pending',
+    'todos/filfilled',
+    'todos/rejected'
+])
 
- const fetchingReducer = ( state = initialFetchingReducer, action ) => 
-{
-  
-  switch (action.type) {
-    case 'todos/pending':
-    {
-      return { ...state, loading: 'pending'}
-    }     
-    case 'todos/fullfilled':
-    {
-      return { ...state, loading: 'succeded'}
-    }
-    case 'todos/error':
-    {
-      return { error: action.error, loading: 'rejected'}
-    }
-    default:
-    {
-     return {...state, loading: 'idle'}
-    }
-  }
-}
+const fullfilledReducer = makeSetReducer(['todos/fullfilled'])
 
-const todosReducer = (state = [], action) =>
-{
+const provReducer = makeCrudReducer(['todo/add','todo/complete'])
 
-  switch (action.type) {
-    case 'todos/fullfilled':{
-      return action.payload
-    }
-    case 'todo/add':{
-      return state.concat({...action.payload })
-    }
-    case 'todo/complete': {
-      const newTodos = state.map(todo => {
-        if(todo.id === action.payload.id)
-          return {...todo, completed: !todo.completed }
-        return todo
-      })
-     return newTodos
-    }
-    default:
-      return state;
-  }
-}
+const todosReducer = reduceReducers(provReducer, fullfilledReducer)
 
 export const reducer =  combineReducers({
   todos: combineReducers({

@@ -11,6 +11,6 @@ export const fetchThunk = () => async dispatch => {
   }
   catch (e) 
   {
-    dispatch(setError(e))
+    dispatch(setError(e.message))
   }
 }
